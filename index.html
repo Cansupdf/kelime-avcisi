@@ -145,6 +145,31 @@ html,body{width:100%;height:100%;overflow:hidden;user-select:none;font-family:'N
   font-family:'Nunito',sans-serif;box-shadow:0 6px 24px rgba(0,180,255,.4);transition:transform .1s}
 #next-btn:active{transform:scale(.95)}
 
+
+/* MAIN MENU */
+#main-menu{position:fixed;inset:0;z-index:300;display:flex;align-items:center;justify-content:center;
+  backdrop-filter:blur(0px);background:rgba(0,0,0,0);transition:opacity .5s}
+#main-menu.hide{opacity:0;pointer-events:none}
+#menu-card{background:rgba(5,10,40,.95);border:1.5px solid rgba(100,200,255,.3);
+  border-radius:32px;padding:48px 36px;text-align:center;width:88%;max-width:340px;
+  box-shadow:0 0 80px rgba(80,150,255,.15),0 24px 60px rgba(0,0,0,.7);
+  animation:cardIn .6s cubic-bezier(.34,1.56,.64,1)}
+#menu-card .menu-title{font-family:'Orbitron',sans-serif;font-size:28px;font-weight:900;
+  background:linear-gradient(135deg,#43ea80,#00d4ff);-webkit-background-clip:text;
+  -webkit-text-fill-color:transparent;margin-bottom:6px;letter-spacing:2px}
+#menu-card .menu-sub{font-size:13px;color:rgba(255,255,255,.4);margin-bottom:36px;font-weight:700}
+.menu-btn{width:100%;padding:15px;border:none;border-radius:22px;font-size:17px;
+  font-weight:900;cursor:pointer;font-family:'Nunito',sans-serif;
+  transition:transform .12s,box-shadow .12s;margin-bottom:12px;letter-spacing:.5px}
+.menu-btn:active{transform:scale(.95)}
+#btn-new{background:linear-gradient(135deg,#1a56d6,#00d4ff);color:#fff;
+  box-shadow:0 6px 24px rgba(0,180,255,.4)}
+#btn-continue{background:linear-gradient(135deg,#1a9a50,#43ea80);color:#fff;
+  box-shadow:0 6px 24px rgba(67,234,128,.35)}
+#btn-continue.disabled{background:rgba(255,255,255,.1);color:rgba(255,255,255,.3);
+  box-shadow:none;cursor:not-allowed}
+.menu-save-info{font-size:12px;color:rgba(255,255,255,.35);margin-top:4px;font-weight:700}
+
 /* CONFETTI */
 .confetti{position:fixed;pointer-events:none;z-index:150;width:10px;height:10px;
   border-radius:2px;animation:confettiFall 1.6s ease forwards}
@@ -159,6 +184,17 @@ html,body{width:100%;height:100%;overflow:hidden;user-select:none;font-family:'N
 </head>
 <body>
 <canvas id="bgCanvas"></canvas>
+
+<div id="main-menu">
+  <div id="menu-card">
+    <div class="menu-title">KELİME AVCISI</div>
+    <div class="menu-sub">🔍 Harfleri birleştir, kelimeleri keşfet!</div>
+    <button class="menu-btn" id="btn-new" onclick="startNew()">🎮 YENİ OYUN</button>
+    <button class="menu-btn" id="btn-continue" onclick="startContinue()">▶️ DEVAM ET</button>
+    <div class="menu-save-info" id="save-info"></div>
+  </div>
+</div>
+
 
 <div id="game">
   <div id="header">
@@ -852,6 +888,7 @@ function submit(){
     const pts=word.length*15+(puzzle.required.includes(word)?30:0);
     score+=pts;lvlScore+=pts;
     document.getElementById('score-val').textContent=score;
+  saveProgress();
     playSuccess();
     showFoundAnim(word);
     animateWordFound(word);
@@ -887,6 +924,7 @@ function levelDone(){
 function nextLevel(){
   document.getElementById('overlay').classList.remove('show');
   lvlIdx=Math.min(lvlIdx+1,10000);
+  saveProgress();
   init();
 }
 
@@ -912,6 +950,7 @@ function hint(){
   // Deduct 100 points
   score-=100;
   document.getElementById('score-val').textContent=score;
+  saveProgress();
 
   // Solve the first missing word
   const w=missing[0];
@@ -959,8 +998,77 @@ function spawnConfetti(){
 // ═══════════════════════════════════════════════════
 // START
 // ═══════════════════════════════════════════════════
-window.addEventListener('load',()=>{
+// ═══════════════════════════════════════════════════
+// SAVE / LOAD
+// ═══════════════════════════════════════════════════
+function saveProgress(){
+  try{
+    localStorage.setItem('ka_level', lvlIdx);
+    localStorage.setItem('ka_score', score);
+  }catch(e){}
+}
+
+function loadProgress(){
+  try{
+    const lvl = parseInt(localStorage.getItem('ka_level'));
+    const sc  = parseInt(localStorage.getItem('ka_score'));
+    return { lvl: lvl||1, score: sc||0 };
+  }catch(e){ return {lvl:1,score:0}; }
+}
+
+function hasSave(){
+  try{
+    const lvl = parseInt(localStorage.getItem('ka_level'));
+    return lvl && lvl > 1;
+  }catch(e){ return false; }
+}
+
+function startNew(){
+  // Reset save
+  try{ localStorage.removeItem('ka_level'); localStorage.removeItem('ka_score'); }catch(e){}
+  lvlIdx=1; score=0;
+  document.getElementById('score-val').textContent=0;
+  hideMenu();
   init();
+}
+
+function startContinue(){
+  const btn = document.getElementById('btn-continue');
+  if(btn.classList.contains('disabled')) return;
+  const saved = loadProgress();
+  lvlIdx = saved.lvl;
+  score  = saved.score;
+  document.getElementById('score-val').textContent=score;
+  saveProgress();
+  hideMenu();
+  init();
+}
+
+function hideMenu(){
+  const menu = document.getElementById('main-menu');
+  menu.classList.add('hide');
+  setTimeout(()=>menu.style.display='none', 500);
+}
+
+function showMenu(){
+  const menu = document.getElementById('main-menu');
+  menu.style.display='flex';
+  menu.classList.remove('hide');
+}
+
+window.addEventListener('load',()=>{
+  // Setup menu
+  const continuBtn = document.getElementById('btn-continue');
+  const saveInfo   = document.getElementById('save-info');
+  if(hasSave()){
+    const saved = loadProgress();
+    continuBtn.classList.remove('disabled');
+    saveInfo.textContent = `📍 Bölüm ${saved.lvl} — ${saved.score} puan`;
+  } else {
+    continuBtn.classList.add('disabled');
+    saveInfo.textContent = 'Henüz kayıt yok';
+  }
+  // Show main menu (don't init yet)
 });
 </script>
 </body>
