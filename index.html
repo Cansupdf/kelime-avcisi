@@ -15,7 +15,7 @@ html,body{width:100%;height:100%;overflow:hidden;user-select:none;font-family:'N
   align-items:center;height:100dvh;max-height:100dvh;max-width:480px;margin:0 auto;padding:0 8px;overflow:hidden}
 
 /* HEADER */
-#header{width:100%;display:flex;align-items:center;justify-content:space-between;padding:8px 4px 4px}
+#header{width:100%;display:flex;align-items:center;justify-content:space-between;padding:6px 4px 2px}
 .hbadge{background:rgba(0,0,0,.4);border:1.5px solid rgba(255,255,255,.25);
   border-radius:20px;padding:5px 16px;color:#fff;font-weight:800;font-size:14px;
   backdrop-filter:blur(10px);box-shadow:0 2px 10px rgba(0,0,0,.3)}
@@ -26,9 +26,9 @@ html,body{width:100%;height:100%;overflow:hidden;user-select:none;font-family:'N
 
 /* WORD SLOTS AREA */
 #slots-area{flex:1;width:100%;display:flex;flex-direction:column;align-items:center;
-  justify-content:center;padding:2px 4px;gap:6px;min-height:0;overflow:hidden;max-height:30vh}
+  justify-content:center;padding:1px 4px;gap:4px;min-height:0;overflow:hidden;max-height:28vh}
 
-.word-row{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;width:100%}
+.word-row{display:flex;flex-wrap:wrap;gap:5px;justify-content:center;width:100%}
 
 .word-group{display:flex;gap:2px;align-items:center;
   background:rgba(0,0,0,.3);border:1px solid rgba(255,255,255,.18);
@@ -62,21 +62,21 @@ html,body{width:100%;height:100%;overflow:hidden;user-select:none;font-family:'N
 .word-group.animate-in .slot-cell:nth-child(7){animation-delay:.30s}
 
 /* PROGRESS */
-#progress-row{width:100%;display:flex;align-items:center;gap:8px;padding:0 8px 4px}
+#progress-row{width:100%;display:flex;align-items:center;gap:8px;padding:0 8px 2px}
 #prog-bar{flex:1;height:5px;background:rgba(255,255,255,.18);border-radius:3px;overflow:hidden}
 #prog-fill{height:100%;background:linear-gradient(90deg,#43ea80,#00d4ff);border-radius:3px;
   transition:width .6s cubic-bezier(.4,0,.2,1);width:0%}
 #prog-text{font-size:12px;color:rgba(255,255,255,.7);font-weight:800;white-space:nowrap}
 
 /* FOUND WORD TOAST */
-#found-row{height:26px;display:flex;align-items:center;justify-content:center}
+#found-row{height:20px;display:flex;align-items:center;justify-content:center}
 #found-word{font-size:20px;font-weight:900;color:#fff;letter-spacing:5px;
   text-shadow:0 0 20px rgba(255,255,255,.8);opacity:0;pointer-events:none}
 #found-word.show{opacity:1;animation:wordUp .4s ease}
 @keyframes wordUp{from{transform:translateY(10px) scale(.8);opacity:0}to{transform:translateY(0) scale(1);opacity:1}}
 
 /* CURRENT WORD */
-#cur-word{min-height:36px;min-width:130px;padding:7px 24px;
+#cur-word{min-height:32px;min-width:120px;padding:5px 20px;text-align:center;align-self:center;
   background:rgba(0,0,0,.35);border:2px solid rgba(255,255,255,.28);
   border-radius:28px;font-size:22px;font-weight:900;color:#fff;letter-spacing:4px;
   text-align:center;backdrop-filter:blur(10px);text-shadow:0 1px 8px rgba(0,0,0,.5)}
@@ -86,7 +86,7 @@ html,body{width:100%;height:100%;overflow:hidden;user-select:none;font-family:'N
 @keyframes flashGreen{0%{transform:scale(1)}40%{transform:scale(1.1)}100%{transform:scale(1)}}
 
 /* CIRCLE */
-#circle-wrap{position:relative;width:min(260px,52vw);height:min(260px,52vw);flex-shrink:0}
+#circle-wrap{position:relative;width:min(240px,62vw);height:min(240px,62vw);flex-shrink:0;margin:0 auto}
 #svg-lines{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;z-index:1}
 .lbtn{position:absolute;width:min(56px,11vw);height:min(56px,11vw);border-radius:50%;
   background:rgba(15,40,130,.85);color:#fff;font-size:20px;font-weight:900;
@@ -178,8 +178,8 @@ html,body{width:100%;height:100%;overflow:hidden;user-select:none;font-family:'N
   100%{transform:translateY(100vh) rotate(720deg);opacity:0}}
 
 /* BOTTOM SECTION */
-#bottom{width:100%;display:flex;flex-direction:column;align-items:center;
-  padding-bottom:env(safe-area-inset-bottom,8px);padding-bottom:max(8px,env(safe-area-inset-bottom));gap:4px;flex-shrink:0}
+#bottom{width:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;
+  padding-bottom:env(safe-area-inset-bottom,8px);padding-bottom:max(4px,env(safe-area-inset-bottom));gap:2px;flex-shrink:0}
 </style>
 </head>
 <body>
@@ -214,7 +214,7 @@ html,body{width:100%;height:100%;overflow:hidden;user-select:none;font-family:'N
     </div>
     <div id="cur-word">?</div>
     <div id="circle-wrap">
-      <svg id="svg-lines" viewBox="0 0 260 260" style="position:absolute;inset:0;width:100%;height:100%;pointer-events:none;z-index:1"></svg>
+      <svg id="svg-lines" style="position:absolute;inset:0;width:100%;height:100%;pointer-events:none;z-index:1"></svg>
     </div>
   </div>
 </div>
@@ -780,8 +780,15 @@ function animateWordFound(word){
 function renderCircle(){
   const wrap=document.getElementById('circle-wrap');
   wrap.querySelectorAll('.lbtn').forEach(b=>b.remove());
-  document.getElementById('svg-lines').innerHTML='';
-  const N=puzzle.letters.length,cx=130,cy=130,R=90;
+  const svgEl=document.getElementById('svg-lines');
+  const wrapEl=document.getElementById('circle-wrap');
+  const wS=wrapEl.offsetWidth||240;
+  svgEl.setAttribute('viewBox',`0 0 ${wS} ${wS}`);
+  svgEl.innerHTML='';
+  const wrap2=document.getElementById('circle-wrap');
+  const S=wrap2.offsetWidth||240;
+  const half=S/2;
+  const N=puzzle.letters.length,cx=half,cy=half,R=half*0.72;
   puzzle.letters.forEach((letter,i)=>{
     const angle=(i/N)*Math.PI*2-Math.PI/2;
     const x=cx+R*Math.cos(angle),y=cy+R*Math.sin(angle);
@@ -816,7 +823,10 @@ function drawLines(){
 
 function getPos(idx){
   const b=document.querySelector(`.lbtn[data-i="${idx}"]`);
-  return b?{x:parseFloat(b.dataset.x),y:parseFloat(b.dataset.y)}:{x:130,y:130};
+  if(!b)return{x:120,y:120};
+  const wrap=document.getElementById('circle-wrap');
+  const S=wrap.offsetWidth||240;
+  return{x:parseFloat(b.dataset.x),y:parseFloat(b.dataset.y)};
 }
 
 let _moveH,_upH,_tmoveH,_tupH;
